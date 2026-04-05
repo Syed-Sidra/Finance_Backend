@@ -6,8 +6,8 @@ import com.finance.enums.TransactionType;
 import com.finance.repository.TransactionRepository;
 import com.finance.service.DashboardService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -23,19 +23,23 @@ public class DashboardServiceImpl implements DashboardService {
     private static final int RECENT_ACTIVITY_LIMIT = 10;
 
     @Override
+    @Transactional(readOnly = true)
     public DashboardResponse getSummary() {
         BigDecimal totalIncome = transactionRepository.sumByType(TransactionType.INCOME);
         BigDecimal totalExpenses = transactionRepository.sumByType(TransactionType.EXPENSE);
         BigDecimal netBalance = totalIncome.subtract(totalExpenses);
 
+        // Category totals (all)
         Map<String, BigDecimal> categoryTotals = buildCategoryMap(
                 transactionRepository.sumGroupedByCategory());
 
+        // Category totals split by type
         Map<String, BigDecimal> incomeCategoryTotals = buildCategoryMap(
                 transactionRepository.sumGroupedByCategoryAndType(TransactionType.INCOME));
         Map<String, BigDecimal> expenseCategoryTotals = buildCategoryMap(
                 transactionRepository.sumGroupedByCategoryAndType(TransactionType.EXPENSE));
 
+        // Recent activity (last 10 non-deleted)
         List<TransactionResponse> recentActivity = transactionRepository
                 .findRecentActivity()
                 .stream()
@@ -43,6 +47,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .map(transactionService::toResponse)
                 .collect(Collectors.toList());
 
+        // Monthly trends
         List<DashboardResponse.MonthlyTrend> monthlyTrends = buildMonthlyTrends(
                 transactionRepository.monthlyTrends());
 
@@ -69,7 +74,8 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private List<DashboardResponse.MonthlyTrend> buildMonthlyTrends(List<Object[]> rows) {
-
+        // rows: [year, month, type, sum]
+        // We need to merge INCOME and EXPENSE for the same year/month into one trend object
         Map<String, DashboardResponse.MonthlyTrend> trendMap = new LinkedHashMap<>();
 
         for (Object[] row : rows) {

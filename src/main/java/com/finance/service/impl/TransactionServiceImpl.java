@@ -43,11 +43,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TransactionResponse getTransactionById(Long id) {
         return toResponse(findOrThrow(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TransactionResponse> getAllTransactions(
             TransactionType type, String category, LocalDate from, LocalDate to) {
 
@@ -97,6 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transaction);
     }
 
+    // --- Helpers ---
 
     private Transaction findOrThrow(Long id) {
         return transactionRepository.findByIdAndDeletedFalse(id)
