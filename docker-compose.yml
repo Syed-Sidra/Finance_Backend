@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: finance-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: finance_db
+      MYSQL_USER: financeuser
+      MYSQL_PASSWORD: ${DB_PASSWORD:-rootpassword}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - finance-net
+
+  app:
+    build: .
+    container_name: finance-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/finance_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: financeuser
+      DB_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      JWT_SECRET: ${JWT_SECRET:-3d6f8c2a1b9e4f7c0a5d2e8b3c7a1f4d9b6e3c0a5f8d2b7e4c1a9f6d3b0e7c4a1b2}
+      JWT_ACCESS_EXPIRY_MS: ${JWT_ACCESS_EXPIRY_MS:-900000}
+      JWT_REFRESH_EXPIRY_MS: ${JWT_REFRESH_EXPIRY_MS:-604800000}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_logs:/app/logs
+    networks:
+      - finance-net
+
+volumes:
+  mysql_data:
+  app_logs:
+
+networks:
+  finance-net:
+    driver: bridge
