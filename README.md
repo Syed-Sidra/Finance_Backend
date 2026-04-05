@@ -23,60 +23,6 @@ A full-featured finance dashboard backend built with **Spring Boot 3**, **MySQL*
 
 ---
 
-## Quick Start
-
-### Option A — Docker 
-```bash
-cp .env
-
-docker-compose up --build
-```
-
-App starts at http://localhost:8080
-Swagger UI: http://localhost:8080/swagger-ui.html
-
-### Option B — Local 
-```bash
-# 1. Create DB
-mysql -u root -p -e "CREATE DATABASE finance_db;"
-
-# 2. Configure credentials
-cp .env
-
-
-# 3. Export env vars 
-export DB_PASSWORD=your_password
-export JWT_SECRET=$(openssl rand -hex 32)
-
-# 4. Run
-mvn spring-boot:run
-```
-
-Flyway will automatically run all migrations (V1, V2, V3) and create all tables + seed admin.
-
----
-
-## Environment Variables
-
-All secrets are externalized. Never commit `.env` to git.
-
-| Variable | Description | Default |
-|---|---|---|
-| `DB_URL` | JDBC connection string | localhost:3306/finance_db |
-| `DB_USERNAME` | Database username | root |
-| `DB_PASSWORD` | Database password | **required** |
-| `JWT_SECRET` | 32+ char hex secret for signing JWT | **required in prod** |
-| `JWT_ACCESS_EXPIRY_MS` | Access token TTL in ms | 900000 (15 min) |
-| `JWT_REFRESH_EXPIRY_MS` | Refresh token TTL in ms | 604800000 (7 days) |
-| `SERVER_PORT` | HTTP port | 8080 |
-
-Generate a secure JWT secret:
-```bash
-openssl rand -hex 32
-```
-
----
-
 ## Database Migrations (Flyway)
 
 Migrations live in `src/main/resources/db/migration/`. Flyway runs them automatically on startup in order.
@@ -122,14 +68,13 @@ Authorization: Bearer <accessToken>
 #### Refresh Tokens
 ```
 POST /api/auth/refresh
-{ "refreshToken": "<your refresh token>" }
+{ "refreshToken": "< refresh token>" }
 ```
-Issues a new access + refresh token pair (rotation — old token is revoked).
-
+Issues a new access + refresh token pair 
 #### Logout
 ```
 POST /api/auth/logout
-{ "refreshToken": "<your refresh token>" }
+{ "refreshToken": "< refresh token>" }
 ```
 Revokes the refresh token server-side.
 
@@ -184,22 +129,8 @@ GET /actuator/metrics          (ADMIN only)
 GET /actuator/metrics/jvm.memory.used
 ```
 
-### Request ID Tracing
-Every response includes `X-Request-ID` header. Every log line includes `[requestId]`:
-```
-2024-06-01 10:00:00.123 [main] INFO [a1b2c3d4] c.f.l.RequestIdFilter - GET /api/transactions → 200 (45ms)
-```
-Logs are written to `logs/finance-backend.log` with daily rotation (30-day retention).
-
----
 
 ## Running Tests
-
-```bash
-mvn test
-```
-
-Tests use H2 in-memory database. Flyway is disabled for tests — Hibernate manages the schema.
 
 Test coverage includes:
 - Unit tests: UserService, TransactionService, DashboardService
