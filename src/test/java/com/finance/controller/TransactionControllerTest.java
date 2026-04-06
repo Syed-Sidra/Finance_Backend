@@ -57,7 +57,7 @@ class TransactionControllerTest {
                 .fullName(name).email(email)
                 .password(passwordEncoder.encode("password123"))
                 .role(role).active(true).build());
-        return "Bearer " + jwtUtils.generateToken(user);
+        return "Bearer " + jwtUtils.generateAccessToken(user);
     }
 
     private TransactionRequest validRequest() {
