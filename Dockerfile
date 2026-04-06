@@ -5,7 +5,7 @@ COPY pom.xml .
 # Download dependencies first (cached layer)
 RUN mvn dependency:go-offline -q
 COPY src ./src
-RUN mvn clean package -DskipTests -q
+RUN mvn clean install -Dmaven.test.skip=true
 
 # Stage 2: Run
 FROM eclipse-temurin:17-jre-alpine
