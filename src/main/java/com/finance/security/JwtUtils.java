@@ -45,6 +45,10 @@ public class JwtUtils {
         return refreshTokenExpiryMs;
     }
 
+    public long getAccessTokenExpiryMs() {
+        return accessTokenExpiryMs;
+    }
+
     private String buildToken(Map<String, Object> claims, String subject, long expiryMs) {
         return Jwts.builder()
                 .setClaims(claims)

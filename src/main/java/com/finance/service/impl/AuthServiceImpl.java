@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -100,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
-                .accessTokenExpiresIn(jwtUtils.getRefreshTokenExpiryMs() / 1000)
+                .accessTokenExpiresIn(jwtUtils.getAccessTokenExpiryMs() / 1000)
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole().name())
