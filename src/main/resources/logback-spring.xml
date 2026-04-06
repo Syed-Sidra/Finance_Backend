@@ -1,33 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- Console appender — human-readable for local dev -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{requestId:-no-id}] %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Rolling file appender — one file per day, keep 30 days -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/finance-backend.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/finance-backend.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{requestId:-no-id}] %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <!-- Application logs -->
     <logger name="com.finance" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
     </logger>
 
-    <!-- Suppress noisy framework logs -->
     <logger name="org.springframework.security" level="WARN"/>
     <logger name="org.hibernate.SQL" level="WARN"/>
     <logger name="org.flywaydb" level="INFO"/>
@@ -35,7 +18,6 @@
 
     <root level="WARN">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
     </root>
 
 </configuration>
